@@ -1,8 +1,8 @@
 
 
 
-var global_num = if (true) { 10 } else { 202 }
-var global_num2 = if (true) { 10 } else { 20 }
+var global_num = 1
+var global_num2 = 2
 
 {
 	person := Person{name = "shmuli", age = 22}
@@ -10,16 +10,22 @@ var global_num2 = if (true) { 10 } else { 20 }
 	person = Person{name = "shmuli", age = 22}
 }
 
+
+
+
+
+
 func add(b int) int {
+	g := if (true) { global_num } else { global_num2 }
 	a := if (true) { 10 } else { 20 }
 	c := 1
 	c = b
-	c = add(c)
+	c = add(b)
 	if (true) {
 		num := if (true) {
 			d := c + b
 			d
 		}  else {1}
 	}
-	return global_num
+	return if (true) { g } else { 1 }
 }

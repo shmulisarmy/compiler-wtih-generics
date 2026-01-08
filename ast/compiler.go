@@ -64,11 +64,11 @@ func (this ScopeStack) Type_check_block(block *Block) {
 }
 
 func (this ScopeStack) ensure_var_has_proper_type(var_declaration *VarDeclaration) {
-	{
-		if var_declaration.Name == "global_num" {
-			assert.Equal(len(this), 1)
-		}
-	}
+	// {
+	// 	if var_declaration.Name == "global_num" {
+	// 		assert.Equal(len(this), 1)
+	// 	}
+	// }
 	if var_declaration.Type == "" {
 		var_declaration.Type = get_expression_type(this, *var_declaration.DefaultValue.Expect(fmt.Sprintf("must have either a type or a default value to infer the type of %s", color.YellowString(var_declaration.Name))))
 	} else if var_declaration.DefaultValue.IsPresent() {
@@ -85,12 +85,6 @@ func (this ScopeStack) Symbol_name_to_type(symbol_name string) string {
 		if sym != nil {
 			switch sym := sym.(type) {
 			case VarDeclaration:
-				// this.ensure_var_has_proper_type(&sym)
-				{
-					if sym.Name == "global_num" {
-						assert.Equal(i, 0)
-					}
-				}
 				this[:i+1].ensure_var_has_proper_type(&sym)
 				return sym.Type
 			case Function:
@@ -256,7 +250,6 @@ func get_expression_type(scopes ScopeStack, e Expression) string {
 		not_a_template := true
 		assert.Assert(not_a_template)
 		function := scopes.Symbol_name_to_type(e.FunctionReference.(Identifier).Name)
-
 		assert.Assert(strings.HasPrefix(function, "returns:"))
 		return function[len("returns:"):]
 	default:

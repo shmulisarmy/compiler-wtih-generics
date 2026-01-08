@@ -53,7 +53,7 @@ func main() {
 
 	scopeStack.Type_check_block(&block)
 	scopeStack.Type_check_function(&function)
-	scopeStack.Ensure_function_has_proper_return_type(&function)
+	// scopeStack.Ensure_function_has_proper_return_type(&function)
 	assert.Equal(len(scopeStack), 1)
 	fmt.Println(function)
 	fmt.Println(block)
