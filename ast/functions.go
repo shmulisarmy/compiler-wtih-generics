@@ -15,6 +15,8 @@ type Function struct {
 	Range
 }
 
+func (this Function) Symbol__() {}
+
 func (this Function) String() string {
 	var params []string
 	for _, param := range this.Params {

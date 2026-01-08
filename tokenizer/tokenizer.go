@@ -23,6 +23,7 @@ const (
 	USING  TokenType = "USING"
 	BREAK  TokenType = "BREAK"
 	UNLESS TokenType = "UNLESS"
+	VAR    TokenType = "VAR"
 
 	// Operators
 	ASSIGN TokenType = "ASSIGN" // =
@@ -64,6 +65,7 @@ var keywords = map[string]TokenType{
 	"break":  BREAK,
 	"unless": UNLESS,
 	"using":  USING,
+	"var":    VAR,
 }
 
 type Token struct {

@@ -2,9 +2,12 @@ package assert
 
 import "fmt"
 
-func Equal[T comparable](t T, expected T) {
+func Equal[T comparable](t T, expected T, message ...string) {
+	if len(message) == 0 {
+		message = append(message, fmt.Sprintf("expected %v, got %v", expected, t))
+	}
 	if t != expected {
-		panic(fmt.Sprintf("expected %v, got %v", expected, t))
+		panic(message[0])
 	}
 }
 
