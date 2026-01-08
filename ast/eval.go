@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/shmuli/all-compilers/dk-what-to-call-this-one/runtime"
+import (
+	"github.com/shmuli/all-compilers/dk-what-to-call-this-one/runtime"
+)
 
 func (this FieldAccess) Eval() runtime.LanguageValue {
 	print(HighlightRange("", this.Range))
@@ -31,6 +33,7 @@ func (this String) Eval() runtime.LanguageValue {
 	print(HighlightRange("", this.Range))
 	return this.Value
 }
+
 func (this Identifier) Eval() runtime.LanguageValue {
 	print(HighlightRange("", this.Range))
 	value := runtime.Get_value(this.Name)

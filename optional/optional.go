@@ -37,19 +37,26 @@ func (o Optional[T]) Get() (T, bool) {
 }
 
 // Unwrap returns the value, panicking if it's not present
-func (o Optional[T]) Unwrap() T {
+func (o Optional[T]) Unwrap() *T {
 	if !o.present {
 		panic("called Unwrap on an empty Optional")
 	}
-	return o.value
+	return &o.value
+}
+
+func (o Optional[T]) Expect(message string) *T {
+	if !o.present {
+		panic(message)
+	}
+	return &o.value
 }
 
 // UnwrapOr returns the value if present, otherwise returns the default value
-func (o Optional[T]) UnwrapOr(defaultValue T) T {
+func (o Optional[T]) UnwrapOr(defaultValue T) *T {
 	if o.present {
-		return o.value
+		return &o.value
 	}
-	return defaultValue
+	return &defaultValue
 }
 
 // Map applies a function to the contained value if present

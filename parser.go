@@ -28,6 +28,18 @@ func (this *Parser) TakeToken() Token {
 	return tok
 }
 
+func (this *Parser) OptionallyExpectSequence(expectedTypes ...TokenType) bool {
+	//will not move the position unless all the expected types are found
+	walk_back_pos := this.pos
+	for _, expectedType := range expectedTypes {
+		if !this.OptionallyExpect(expectedType) {
+			this.pos = walk_back_pos
+			return false
+		}
+	}
+
+	return true
+}
 func (this *Parser) OptionallyExpect(expectedType TokenType) bool {
 	t := this.currentToken()
 	if t.Type == expectedType {
@@ -49,6 +61,17 @@ func (this *Parser) Statement() Statement {
 	if this.OptionallyExpect(RETURN) {
 		return Return{
 			Value: Some(this.Expression()),
+			Range: Range{
+				Start: start_pos,
+				End:   this.curPos(),
+			},
+		}
+	}
+
+	if var_token := this.currentToken(); this.OptionallyExpectSequence(IDENT, COLON, ASSIGN) {
+		return VarDeclaration{
+			Name:         var_token.Literal,
+			DefaultValue: Some(this.Expression()),
 			Range: Range{
 				Start: start_pos,
 				End:   this.curPos(),
@@ -101,6 +124,7 @@ func (this *Parser) Statement() Statement {
 }
 func (this *Parser) Block() Block {
 	var stmts []Statement
+	start_pos := this.curPos()
 	this.Expect(LBRACE)
 	for !this.OptionallyExpect(RBRACE) {
 		stmt := this.Statement()
@@ -120,7 +144,7 @@ func (this *Parser) Block() Block {
 	return Block{
 		Statements: stmts,
 		Range: Range{
-			Start: this.curPos(),
+			Start: start_pos,
 			End:   this.curPos(),
 		},
 	}
@@ -129,21 +153,7 @@ func (this *Parser) Block() Block {
 func (this *Parser) Term() Expression {
 
 	start_pos := this.curPos()
-	if this.currentToken().Type == LBRACE {
-		fields := CustomList(this, LBRACE, RBRACE, func(this *Parser) FieldNode {
-			field_name := this.Expect(IDENT).Literal
-			this.Expect(ASSIGN)
-			return FieldNode{
-				Name:  field_name,
-				Value: this.Expression(),
-				Range: Range{
-					Start: this.curPos(),
-					End:   this.curPos(),
-				},
-			}
-		})
-		return ObjectInstanciation(fields)
-	}
+
 	t := this.TakeToken()
 	switch t.Type {
 	case USING:
@@ -197,6 +207,24 @@ func (this *Parser) Term() Expression {
 					Start: start_pos,
 					End:   this.curPos(),
 				},
+			}
+			if this.currentToken().Type == LBRACE {
+				fields := ParseCustomList(this, LBRACE, RBRACE, func(this *Parser) FieldNode {
+					field_name := this.Expect(IDENT).Literal
+					this.Expect(ASSIGN)
+					return FieldNode{
+						Name:  field_name,
+						Value: this.Expression(),
+						Range: Range{
+							Start: this.curPos(),
+							End:   this.curPos(),
+						},
+					}
+				})
+				return ObjectInstanciation{
+					ClassName: t.Literal,
+					Fields:    fields,
+				}
 			}
 		case COLON:
 			expr = UsingField{
@@ -279,7 +307,7 @@ var operatorPrecedence = map[TokenType]int{
 	DIV:   3,
 }
 
-func CustomList[T any](this *Parser, openingToken TokenType, closingToken TokenType, f func(this *Parser) T) []T {
+func ParseCustomList[T any](this *Parser, openingToken TokenType, closingToken TokenType, f func(this *Parser) T) []T {
 	exprs := []T{}
 	this.Expect(openingToken)
 	for !this.OptionallyExpect(closingToken) {

@@ -34,6 +34,10 @@ type Range struct {
 	End   Pos
 }
 
+func (r Range) PositionLink(filename string) string {
+	return color.BlueString(fmt.Sprintf("%s:%d:%d", filename, r.Start.Line, r.Start.Col))
+}
+
 func (r Range) String() string {
 	return fmt.Sprintf("%s[%s → %s]",
 		color.CyanString("Range"),
@@ -47,6 +51,7 @@ func (r Range) String() string {
 
 type Expression interface {
 	Eval() runtime.LanguageValue
+	PositionLink(filename string) string
 }
 
 // Expression implementations
@@ -114,12 +119,12 @@ func (b BinaryExpression) String() string {
 // Statement Interface and Implementations
 // ============================================================================
 
-func (Block) Expression__() {
+func (Block) Expression__() {}
+func (Block) Statement__()  {}
 
-}
-func (Block) Statement__() {
+type Symbol interface{ Symbol__() }
 
-}
+func (Assignment) Symbol__() {}
 
 type Block struct {
 	Statements []Statement
@@ -251,6 +256,7 @@ func (this String) Expression__() {
 }
 
 type NoneValue struct {
+	Range
 }
 
 func (NoneValue) String() string {
@@ -269,19 +275,23 @@ type FieldNode struct {
 	Value Expression
 	Range
 }
-type ObjectInstanciation []FieldNode
+type ObjectInstanciation struct {
+	ClassName string
+	Fields    []FieldNode
+	Range
+}
 
 func (this ObjectInstanciation) String() string {
 	var fields []string
-	for _, field := range this {
+	for _, field := range this.Fields {
 		fields = append(fields, fmt.Sprintf("%s: %s", field.Name, field.Value))
 	}
-	return fmt.Sprintf("{%s}",
+	return fmt.Sprintf("%s{%s}", color.GreenString(this.ClassName),
 		strings.Join(fields, ", "))
 }
 func (this ObjectInstanciation) Eval() runtime.LanguageValue {
 	object := make(map[string]runtime.LanguageValue)
-	for _, field := range this {
+	for _, field := range this.Fields {
 		object[field.Name] = field.Value.Eval()
 	}
 	return object
@@ -411,4 +421,31 @@ func (this Unless) Run() {
 		return
 	}
 	this.Body.Run()
+}
+
+//
+
+type VarDeclaration struct {
+	Name         string
+	Type         string
+	DefaultValue optional.Optional[Expression]
+	Range
+}
+
+func (this VarDeclaration) String() string {
+	var default_value string
+	if this.DefaultValue.IsPresent() {
+		default_value = fmt.Sprintf(" = %s", *this.DefaultValue.Unwrap())
+	}
+	return fmt.Sprintf("%s%s%s",
+		color.YellowString(this.Name),
+		color.GreenString(this.Type),
+		default_value)
+}
+
+func (this VarDeclaration) Run() {
+	if this.DefaultValue.IsPresent() {
+		runtime.Set_value(this.Name, (*this.DefaultValue.Unwrap()).Eval())
+	}
+
 }

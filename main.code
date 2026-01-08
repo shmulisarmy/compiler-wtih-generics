@@ -1,33 +1,19 @@
-using {car = {name = "BMW", year = 2020}} {
-	print(:car.name)
-	person= {name = "John", age = 100}
-	print("fuck you") unless person.age < 18
-	print("fuck you") unless using (person){
-		:age < 18
 
+
+{
+	person := Person{name = "shmuli", age = 22}
+	print("hello", person.name)
+	person = Person{name = "shmuli", age = 22}
+}
+
+func add(b int) int {
+	a := if (true) { 10 } else { 20 }
+	c := a 
+	c = b
+	if (true) {
+		num := if (true) {
+			d := c + b
+			d
+		}  else {1}
 	}
-	
-	person= {name = "John", age = 25}
-	print(2 + 3 * age)
-	age = if 1 > 0 {2} else {0}
-	print(age)
-	print(person.name)
-	person.name = "jp"
-	using (person){
-		print(:name)
-		bro = using ({name = "jade", age = 25}) {
-			print(:name)
-			print("is awesome")
-			100
-		}
-	}
-	print(person.name)
-	a = 1
-	print( while a < 10 {
-		print(a)
-		a = a + 1
-		if a > 50 {
-			break: 100
-		}
-	} else { break 69} )
 }

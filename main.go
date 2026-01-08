@@ -5,25 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/shmuli/all-compilers/dk-what-to-call-this-one/display"
+	"github.com/shmuli/all-compilers/dk-what-to-call-this-one/ast"
 	"github.com/shmuli/all-compilers/dk-what-to-call-this-one/tokenizer"
 )
-
-func sanityCheck() {
-	source := `:car.name`
-	t := tokenizer.New(source)
-	tokens := t.Tokenize()
-
-	p := Parser{
-		tokens: tokens,
-	}
-	for _, tok := range tokens {
-		fmt.Println(tok)
-	}
-	e := p.Term()
-	display.DisplayStruct(e)
-	fmt.Println(e)
-}
 
 func main() {
 
@@ -48,7 +32,12 @@ func main() {
 	for _, tok := range tokens {
 		fmt.Println(tok)
 	}
-	e := p.Statement()
-	fmt.Println(e)
-	e.Run()
+	block := p.Block()
+	function := p.Function()
+
+	ast.ScopeStack{}.Type_check_block(&block)
+	ast.ScopeStack{}.Type_check_function(&function)
+	fmt.Println(function)
+	fmt.Println(block)
+	block.Run()
 }
